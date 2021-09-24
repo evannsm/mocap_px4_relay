@@ -26,29 +26,34 @@ public:
                                                                    });
         optitrack_rigid_body_array_sub_ =
                 this->create_subscription<mocap_msgs::msg::RigidBodyArray>("/optitrack2_driver/rigid_body_array", 10,
-                                                                   [this](const mocap_msgs::msg::RigidBodyArray::UniquePtr msg) {
-                                                                       auto find_rigid_body_ptr = std::find(
-                                                                               msg->rigid_body_names.begin(),
-                                                                               msg->rigid_body_names.end(),
-                                                                               rigid_body_name_);
-                                                                       if (find_rigid_body_ptr !=
-                                                                           msg->rigid_body_names.end()) {
-                                                                           px4_msgs::msg::VehicleVisualOdometry visual_odometry_msg;
-                                                                           auto rigid_body_idx = find_rigid_body_ptr -
-                                                                                                 msg->rigid_body_names.begin();
-                                                                           visual_odometry_msg.x = msg->poses[rigid_body_idx].position.x;
-                                                                           visual_odometry_msg.y = msg->poses[rigid_body_idx].position.y;
-                                                                           visual_odometry_msg.z = msg->poses[rigid_body_idx].position.z;
-                                                                           visual_odometry_msg.q[0] = msg->poses[rigid_body_idx].orientation.w;
-                                                                           visual_odometry_msg.q[1] = msg->poses[rigid_body_idx].orientation.x;
-                                                                           visual_odometry_msg.q[2] = msg->poses[rigid_body_idx].orientation.y;
-                                                                           visual_odometry_msg.q[3] = msg->poses[rigid_body_idx].orientation.z;
-                                                                           visual_odometry_msg.timestamp =
-                                                                                   timestamp_.load() - (this->now() -
-                                                                                                        msg->header.stamp).nanoseconds() / 1000;
-                                                                           px4_visual_odom_pub_->publish(visual_odometry_msg);
-                                                                       }
-                                                                   });
+                                                                           [this](const mocap_msgs::msg::RigidBodyArray::UniquePtr msg) {
+                                                                               auto find_rigid_body_ptr = std::find(
+                                                                                       msg->rigid_body_names.begin(),
+                                                                                       msg->rigid_body_names.end(),
+                                                                                       rigid_body_name_);
+                                                                               if (find_rigid_body_ptr !=
+                                                                                   msg->rigid_body_names.end()) {
+                                                                                   px4_msgs::msg::VehicleVisualOdometry visual_odometry_msg;
+                                                                                   auto rigid_body_idx =
+                                                                                           find_rigid_body_ptr -
+                                                                                           msg->rigid_body_names.begin();
+                                                                                   visual_odometry_msg.x = msg->poses[rigid_body_idx].position.x;
+                                                                                   visual_odometry_msg.y = msg->poses[rigid_body_idx].position.y;
+                                                                                   visual_odometry_msg.z = msg->poses[rigid_body_idx].position.z;
+                                                                                   visual_odometry_msg.q[0] = msg->poses[rigid_body_idx].orientation.w;
+                                                                                   visual_odometry_msg.q[1] = msg->poses[rigid_body_idx].orientation.x;
+                                                                                   visual_odometry_msg.q[2] = msg->poses[rigid_body_idx].orientation.y;
+                                                                                   visual_odometry_msg.q[3] = msg->poses[rigid_body_idx].orientation.z;
+                                                                                   visual_odometry_msg.timestamp = timestamp_.load();
+                                                                                   visual_odometry_msg.timestamp_sample =
+                                                                                           timestamp_.load() -
+                                                                                           (this->now() -
+                                                                                            msg->header.stamp).nanoseconds() /
+                                                                                           1000;
+                                                                                   px4_visual_odom_pub_->publish(
+                                                                                           visual_odometry_msg);
+                                                                               }
+                                                                           });
     }
 
 private:
