@@ -25,7 +25,7 @@ public:
                                                                        timestamp_.store(msg->timestamp);
                                                                    });
         optitrack_rigid_body_array_sub_ =
-                this->create_subscription<px4_msgs::msg::Timesync>("/optitrack2_driver/rigid_body_array", 10,
+                this->create_subscription<mocap_msgs::msg::RigidBodyArray>("/optitrack2_driver/rigid_body_array", 10,
                                                                    [this](const mocap_msgs::msg::RigidBodyArray::UniquePtr msg) {
                                                                        auto find_rigid_body_ptr = std::find(
                                                                                msg->rigid_body_names.begin(),
