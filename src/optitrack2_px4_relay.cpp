@@ -45,11 +45,7 @@ public:
                                                                                    visual_odometry_msg.q[2] = msg->poses[rigid_body_idx].orientation.y;
                                                                                    visual_odometry_msg.q[3] = msg->poses[rigid_body_idx].orientation.z;
                                                                                    visual_odometry_msg.timestamp = timestamp_.load();
-                                                                                   visual_odometry_msg.timestamp_sample =
-                                                                                           timestamp_.load() -
-                                                                                           (this->now() -
-                                                                                            msg->header.stamp).nanoseconds() /
-                                                                                           1000;
+                                                                                   visual_odometry_msg.timestamp_sample = timestamp_.load();
                                                                                    px4_visual_odom_pub_->publish(
                                                                                            visual_odometry_msg);
                                                                                }
