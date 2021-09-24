@@ -1,0 +1,3 @@
+optitrack2_px4_relay_node:
+  ros__parameters:
+    rigid_body_name: "mav1"
