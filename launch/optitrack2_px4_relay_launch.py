@@ -7,16 +7,16 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     params_file_path = os.path.join(get_package_share_directory(
-        'mav_asif'), 'config', 'optitrack2_px4_relay.yaml')
+        'optitrack2_px4_relay'), 'config', 'optitrack2_px4_relay_params.yaml')
 
     ld = LaunchDescription()
 
-    mav1_asif_node = Node(
+    optitrack2_px4_relay = Node(
         package='optitrack2_px4_relay',
         executable='optitrack2_px4_relay',
         output='screen',
         parameters=[params_file_path],
     )
 
-    ld.add_action(mav1_asif_node)
+    ld.add_action(optitrack2_px4_relay)
     return ld

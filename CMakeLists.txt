@@ -35,13 +35,12 @@ add_executable(optitrack2_px4_relay
 ament_target_dependencies(optitrack2_px4_relay ${dependencies})
 
 install(DIRECTORY
+        launch
         config
         DESTINATION share/${PROJECT_NAME}
         )
 
-install(DIRECTORY
-        launch
-        DESTINATION share/${PROJECT_NAME}
-        )
+install(TARGETS optitrack2_px4_relay
+        RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
