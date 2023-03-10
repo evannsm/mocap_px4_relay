@@ -1,5 +1,4 @@
-#include <px4_msgs/msg/vehicle_visual_odometry.hpp>
-#include <px4_msgs/msg/timesync.hpp>
+#include <px4_msgs/msg/vehicle_odometry.hpp>
 #include <mocap_msgs/msg/rigid_body_array.hpp>
 #include <rclcpp/rclcpp.hpp>
 
@@ -8,7 +7,7 @@ using namespace px4_msgs::msg;
 class OptitrackPX4Relay : public rclcpp::Node {
 public:
     OptitrackPX4Relay() : Node("optitrack2_px4_relay_node") {
-        declare_parameter<std::string>("rigid_body_name", "unknown");
+        declare_parameter<std::string>("rigid_body_name", "");
         try {
             get_parameter("rigid_body_name", rigid_body_name_);
         } catch (rclcpp::ParameterTypeException &excp) {
@@ -16,49 +15,41 @@ public:
             rclcpp::shutdown(nullptr, "Parameter type exception caught on initialization");
         }
 
-        px4_visual_odom_pub_ = create_publisher<px4_msgs::msg::VehicleVisualOdometry>(
-                "/" + rigid_body_name_ + "/fmu/vehicle_visual_odometry/in", 10);
+        auto px4_qos_pub = rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local();
 
-        px4_timesync_sub_ =
-                this->create_subscription<px4_msgs::msg::Timesync>("/" + rigid_body_name_ + "/fmu/timesync/out", 10,
-                                                                   [this](const px4_msgs::msg::Timesync::UniquePtr msg) {
-                                                                       timestamp_.store(msg->timestamp);
-                                                                   });
+        px4_visual_odom_pub_ = create_publisher<px4_msgs::msg::VehicleOdometry>(
+                "/fmu/vehicle_mocap_odometry/in", px4_qos_pub);
+
         optitrack_rigid_body_array_sub_ =
-                this->create_subscription<mocap_msgs::msg::RigidBodyArray>("/optitrack2_driver/rigid_body_array", 10,
-                                                                           [this](const mocap_msgs::msg::RigidBodyArray::UniquePtr msg) {
-                                                                               auto find_rigid_body_ptr = std::find(
-                                                                                       msg->rigid_body_names.begin(),
-                                                                                       msg->rigid_body_names.end(),
-                                                                                       rigid_body_name_);
-                                                                               if (find_rigid_body_ptr !=
-                                                                                   msg->rigid_body_names.end()) {
-                                                                                   px4_msgs::msg::VehicleVisualOdometry visual_odometry_msg;
-                                                                                   auto rigid_body_idx =
-                                                                                           find_rigid_body_ptr -
-                                                                                           msg->rigid_body_names.begin();
-                                                                                   visual_odometry_msg.x = msg->poses[rigid_body_idx].position.x;
-                                                                                   visual_odometry_msg.y = msg->poses[rigid_body_idx].position.y;
-                                                                                   visual_odometry_msg.z = msg->poses[rigid_body_idx].position.z;
-                                                                                   visual_odometry_msg.q[0] = msg->poses[rigid_body_idx].orientation.w;
-                                                                                   visual_odometry_msg.q[1] = msg->poses[rigid_body_idx].orientation.x;
-                                                                                   visual_odometry_msg.q[2] = msg->poses[rigid_body_idx].orientation.y;
-                                                                                   visual_odometry_msg.q[3] = msg->poses[rigid_body_idx].orientation.z;
-                                                                                   visual_odometry_msg.timestamp = timestamp_.load();
-                                                                                   visual_odometry_msg.timestamp_sample = timestamp_.load();
-                                                                                   px4_visual_odom_pub_->publish(
-                                                                                           visual_odometry_msg);
-                                                                               }
-                                                                           });
+                create_subscription<mocap_msgs::msg::RigidBodyArray>("/optitrack2_driver/rigid_body_array", 10,
+                 [this](const mocap_msgs::msg::RigidBodyArray::UniquePtr msg) {
+                     auto find_rigid_body_ptr = std::find(
+                             msg->rigid_body_names.begin(),
+                             msg->rigid_body_names.end(),
+                             rigid_body_name_);
+                     if (find_rigid_body_ptr != msg->rigid_body_names.end()) {
+                         px4_msgs::msg::VehicleOdometry mocap_odometry_msg;
+                         auto rigid_body_idx = find_rigid_body_ptr - msg->rigid_body_names.begin();
+
+                         mocap_odometry_msg.position[0] = static_cast<float>(msg->poses[rigid_body_idx].position.x);
+                         mocap_odometry_msg.position[1] = static_cast<float>(msg->poses[rigid_body_idx].position.y);
+                         mocap_odometry_msg.position[2] = static_cast<float>(msg->poses[rigid_body_idx].position.z);
+                         mocap_odometry_msg.q[0] = static_cast<float>(msg->poses[rigid_body_idx].orientation.w);
+                         mocap_odometry_msg.q[1] = static_cast<float>(msg->poses[rigid_body_idx].orientation.x);
+                         mocap_odometry_msg.q[2] = static_cast<float>(msg->poses[rigid_body_idx].orientation.y);
+                         mocap_odometry_msg.q[3] = static_cast<float>(msg->poses[rigid_body_idx].orientation.z);
+                         mocap_odometry_msg.timestamp = int(get_clock()->now().nanoseconds() / 1000);
+                         mocap_odometry_msg.timestamp_sample = int(get_clock()->now().nanoseconds() / 1000);
+                         px4_visual_odom_pub_->publish(mocap_odometry_msg);
+                     }
+                 });
     }
 
 private:
-    rclcpp::Publisher<px4_msgs::msg::VehicleVisualOdometry>::SharedPtr px4_visual_odom_pub_;
+    rclcpp::Publisher<px4_msgs::msg::VehicleOdometry>::SharedPtr px4_visual_odom_pub_;
     rclcpp::Subscription<mocap_msgs::msg::RigidBodyArray>::SharedPtr optitrack_rigid_body_array_sub_;
-    rclcpp::Subscription<px4_msgs::msg::Timesync>::SharedPtr px4_timesync_sub_;
 
     std::string rigid_body_name_;
-    std::atomic<uint64_t> timestamp_;
 };
 
 
