@@ -18,7 +18,7 @@ public:
         auto px4_qos_pub = rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local();
 
         px4_visual_odom_pub_ = create_publisher<px4_msgs::msg::VehicleOdometry>(
-                "/fmu/vehicle_mocap_odometry/in", px4_qos_pub);
+                "/fmu/in/vehicle_mocap_odometry", px4_qos_pub);
 
         optitrack_rigid_body_array_sub_ =
                 create_subscription<mocap_msgs::msg::RigidBodyArray>("/optitrack2_driver/rigid_body_array", 10,
