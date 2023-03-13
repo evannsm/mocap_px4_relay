@@ -31,6 +31,7 @@ public:
                          px4_msgs::msg::VehicleOdometry mocap_odometry_msg;
                          auto rigid_body_idx = find_rigid_body_ptr - msg->rigid_body_names.begin();
 
+                         mocap_odometry_msg.pose_frame = px4_msgs::msg::VehicleOdometry::POSE_FRAME_NED;
                          mocap_odometry_msg.position[0] = static_cast<float>(msg->poses[rigid_body_idx].position.x);
                          mocap_odometry_msg.position[1] = static_cast<float>(msg->poses[rigid_body_idx].position.y);
                          mocap_odometry_msg.position[2] = static_cast<float>(msg->poses[rigid_body_idx].position.z);
@@ -39,7 +40,7 @@ public:
                          mocap_odometry_msg.q[2] = static_cast<float>(msg->poses[rigid_body_idx].orientation.y);
                          mocap_odometry_msg.q[3] = static_cast<float>(msg->poses[rigid_body_idx].orientation.z);
                          mocap_odometry_msg.timestamp = int(get_clock()->now().nanoseconds() / 1000);
-                         mocap_odometry_msg.timestamp_sample = int(get_clock()->now().nanoseconds() / 1000);
+                         mocap_odometry_msg.timestamp_sample = mocap_odometry_msg.timestamp;
                          px4_visual_odom_pub_->publish(mocap_odometry_msg);
                      }
                  });
