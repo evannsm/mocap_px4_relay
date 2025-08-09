@@ -61,23 +61,38 @@ void OptitrackPX4Relay::callback_rigidbodies_pub()
 
 void OptitrackPX4Relay::callback_rigidbodies_sub(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg)
 {
+    RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->rigidbodies[0].rigid_body_name.c_str());
+
     // find the rigid body by name
-    const auto it = std::find_if(
+    const auto find_rigid_body_ptr = std::find_if(
         msg->rigidbodies.begin(), msg->rigidbodies.end(),
         [this](const auto &rb)
         { return rb.rigid_body_name == rigid_body_name_; });
-
-    if (it == msg->rigidbodies.end())
-    {
-        // Not found; nothing to publish this cycle
-        return;
-    }
-
-    const auto &p = it->pose.position;
-    const auto &q = it->pose.orientation;
+    // RCLCPP_INFO(this->get_logger(), "Rigid bodies count: %zu", msg->rigidbodies.size());
+    // RCLCPP_INFO(this->get_logger(), "Rigid body '%s' has index %zu", rigid_body_name_.c_str(), rigid_body_idx);
+    // if (!msg->rigidbodies.empty())
+    // {
+    //     RCLCPP_INFO(this->get_logger(),
+    //                 "rigidbodies.begin() name = %s",
+    //                 msg->rigidbodies.begin()->rigid_body_name.c_str());
+    // }
+    // if (find_rigid_body_ptr == msg->rigidbodies.end())
+    // {
+    //     RCLCPP_WARN(this->get_logger(), "Rigid body '%s' not found", rigid_body_name_.c_str());
+    //     // Not found; nothing to publish this cycle
+    //     return;
+    // }
+    // else
+    // {
+    //     RCLCPP_INFO(this->get_logger(), "Rigid body '%s' found", rigid_body_name_.c_str());
+    // }
+    auto rigid_body_idx = find_rigid_body_ptr - msg->rigidbodies.begin();
 
     // Frame & pose
     mocap_odometry_msg.pose_frame = px4_msgs::msg::VehicleOdometry::POSE_FRAME_NED;
+
+    const auto &p = msg->rigidbodies[rigid_body_idx].pose.position;
+    const auto &q = msg->rigidbodies[rigid_body_idx].pose.orientation;
     mocap_odometry_msg.position[0] = static_cast<float>(p.x);
     mocap_odometry_msg.position[1] = static_cast<float>(p.y);
     mocap_odometry_msg.position[2] = static_cast<float>(p.z);
@@ -87,11 +102,8 @@ void OptitrackPX4Relay::callback_rigidbodies_sub(const mocap4r2_msgs::msg::Rigid
     mocap_odometry_msg.q[2] = static_cast<float>(q.y);
     mocap_odometry_msg.q[3] = static_cast<float>(q.z);
 
-    // Use message header time if available
-    const uint64_t ts_us =
-        static_cast<uint64_t>(rclcpp::Time(msg->header.stamp).nanoseconds() / 1000ULL);
-    mocap_odometry_msg.timestamp = ts_us;
-    mocap_odometry_msg.timestamp_sample = ts_us;
+    mocap_odometry_msg.timestamp = int(get_clock()->now().nanoseconds() / 1000);
+    mocap_odometry_msg.timestamp_sample = mocap_odometry_msg.timestamp;
 
     // px4_visual_odom_pub_->publish(mocap_odometry_msg);
 }
