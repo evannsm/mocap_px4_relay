@@ -6,23 +6,21 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(vicon_receiver REQUIRED)
-find_package(px4_ros_com REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(mocap4r2_msgs REQUIRED)
 
 set(dependencies
   rclcpp
   px4_msgs
-  vicon_receiver
-  px4_ros_com
   Eigen3
+  mocap4r2_msgs
 )
 
-add_executable(vicon_px4_relay
-  src/vicon_px4_relay.cpp
+add_executable(optitrack_px4_relay
+  src/optitrack_to_px4_relay.cpp
 )
 
-ament_target_dependencies(vicon_px4_relay ${dependencies})
+ament_target_dependencies(optitrack_px4_relay ${dependencies})
 
 install(DIRECTORY
         launch
@@ -30,7 +28,7 @@ install(DIRECTORY
         DESTINATION share/${PROJECT_NAME}
         )
 
-install(TARGETS vicon_px4_relay
+install(TARGETS optitrack_px4_relay
         RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
