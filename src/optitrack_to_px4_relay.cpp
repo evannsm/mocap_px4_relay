@@ -61,15 +61,15 @@ void OptitrackPX4Relay::callback_rigidbodies_pub()
 
 void OptitrackPX4Relay::callback_rigidbodies_sub(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg)
 {
-    RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->rigidbodies[0].rigid_body_name.c_str());
+    RCLCPP_INFO(this->get_logger(), "Rigid bodies count: %zu", msg->rigidbodies.size());
+    RCLCPP_INFO(this->get_logger(), "msg->rigidbodies[0].rigid_body_name.c_str()='%s'", msg->rigidbodies[0].rigid_body_name.c_str());
+    RCLCPP_INFO(this->get_logger(), "rigid_body_name_ = '%s'", rigid_body_name_.c_str());
 
-    // find the rigid body by name
-    const auto find_rigid_body_ptr = std::find_if(
+    const auto find_rigid_body_ptr = std::find_if( // find the rigid body by name
         msg->rigidbodies.begin(), msg->rigidbodies.end(),
         [this](const auto &rb)
         { return rb.rigid_body_name == rigid_body_name_; });
-    // RCLCPP_INFO(this->get_logger(), "Rigid bodies count: %zu", msg->rigidbodies.size());
-    // RCLCPP_INFO(this->get_logger(), "Rigid body '%s' has index %zu", rigid_body_name_.c_str(), rigid_body_idx);
+
     // if (!msg->rigidbodies.empty())
     // {
     //     RCLCPP_INFO(this->get_logger(),
@@ -87,6 +87,7 @@ void OptitrackPX4Relay::callback_rigidbodies_sub(const mocap4r2_msgs::msg::Rigid
     //     RCLCPP_INFO(this->get_logger(), "Rigid body '%s' found", rigid_body_name_.c_str());
     // }
     auto rigid_body_idx = find_rigid_body_ptr - msg->rigidbodies.begin();
+    RCLCPP_INFO(this->get_logger(), "Rigid body '%s' has index %zu", rigid_body_name_.c_str(), rigid_body_idx);
 
     // Frame & pose
     mocap_odometry_msg.pose_frame = px4_msgs::msg::VehicleOdometry::POSE_FRAME_NED;
