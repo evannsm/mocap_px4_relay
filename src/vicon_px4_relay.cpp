@@ -1,3 +1,4 @@
+/*
 #include <px4_msgs/msg/vehicle_odometry.hpp>
 #include <vicon_receiver/msg/position.hpp>
 #include "px4_ros_com/frame_transforms.h"
@@ -51,3 +52,5 @@ int main(int argc, char *argv[]) {
     rclcpp::shutdown();
     return 0;
 }
+
+ */

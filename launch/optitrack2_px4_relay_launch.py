@@ -18,5 +18,14 @@ def generate_launch_description():
         parameters=[params_file_path],
     )
 
+    full_state_relay = Node(
+        package='mocap_px4_relay',
+        executable='full_state_relay',
+        output='screen',
+        parameters=[params_file_path],
+    )
+
+
     ld.add_action(optitrack2_px4_relay)
+    ld.add_action(full_state_relay)
     return ld
