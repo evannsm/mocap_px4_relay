@@ -60,10 +60,10 @@ private:
         full_state_msg_.velocity[1] = msg->velocity[1];
         full_state_msg_.velocity[2] = msg->velocity[2];
 
-        full_state_msg_.quaternion[0] = msg->q[0];
-        full_state_msg_.quaternion[1] = msg->q[1];
-        full_state_msg_.quaternion[2] = msg->q[2];
-        full_state_msg_.quaternion[3] = msg->q[3];
+        full_state_msg_.q[0] = msg->q[0];
+        full_state_msg_.q[1] = msg->q[1];
+        full_state_msg_.q[2] = msg->q[2];
+        full_state_msg_.q[3] = msg->q[3];
 
         full_state_msg_.angular_velocity[0] = msg->angular_velocity[0];
         full_state_msg_.angular_velocity[1] = msg->angular_velocity[1];
